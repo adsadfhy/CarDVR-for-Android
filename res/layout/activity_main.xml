@@ -23,4 +23,14 @@
         android:layout_toRightOf="@+id/textView1"
         android:text="HelloAndroid" />
 
+    <ImageView
+        android:id="@+id/imageView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/textView1"
+        android:layout_below="@+id/button1"
+        android:layout_marginLeft="44dp"
+        android:layout_marginTop="60dp"
+        android:src="@android:drawable/alert_dark_frame" />
+
 </RelativeLayout>
