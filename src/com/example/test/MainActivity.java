@@ -4,25 +4,34 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.SurfaceView;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
 
-public class MainActivity extends Activity {
 
+public class MainActivity extends Activity {
+	private SurfaceView mPreviewSV = null; //‘§¿¿SurfaceView  
+	private TextView mTextView = null;
+	private Button mOKButton = null;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		super.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		
 		setContentView(R.layout.activity_main);
 		
-		final TextView textView = (TextView) findViewById(R.id.textView1);
-		Button okButton = (Button) findViewById(R.id.button1);
-		okButton.setOnClickListener(new View.OnClickListener() {
+		mTextView = (TextView) findViewById(R.id.textView1);
+		mOKButton = (Button) findViewById(R.id.button1);
+		mOKButton.setOnClickListener(new View.OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				textView.setText("OK");
+				mTextView.setText("OK");
+				
 			}
 		});
 	}
