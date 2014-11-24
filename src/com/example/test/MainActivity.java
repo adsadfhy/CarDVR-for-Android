@@ -31,7 +31,7 @@ public class MainActivity extends Activity {
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
 				mTextView.setText("OK");
-				
+				mTextView.setText("Thanks");
 			}
 		});
 	}
