@@ -17,20 +17,11 @@
     <Button
         android:id="@+id/button1"
         style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="34dp"
-        android:layout_toRightOf="@+id/textView1"
-        android:text="HelloAndroid" />
-
-    <ImageView
-        android:id="@+id/imageView1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/textView1"
-        android:layout_below="@+id/button1"
-        android:layout_marginLeft="44dp"
-        android:layout_marginTop="60dp"
-        android:src="@android:drawable/alert_dark_frame" />
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/textView1"
+        android:layout_marginTop="35dp"
+        android:text="@string/button_OK" />
 
 </RelativeLayout>
