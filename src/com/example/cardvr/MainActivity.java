@@ -24,14 +24,15 @@ public class MainActivity extends Activity {
 	private SurfaceView mPreviewSV = null; //‘§¿¿SurfaceView  
 	private ImageView mVideoThumnail = null;
 	private ImageButton mVideoButton = null;
+	
 	private ListView mVideoListView = null;
-	private GridLayout mGridLayout = null;
-	private GridLayout mGridLayout2 = null;
+	private ImageButton mReturnButton = null;
+	
 	private Camera mCamera = null;
 	private ArrayList<View> mListViewChildren = null;
 		
 	private static final String[] strs = new String[] {
-	    "first", "second", "third", "fourth", "fifth"
+	    "first1", "second2", "third3", "fourth", "fifth"
 	    };
 	
 	@Override
@@ -41,27 +42,14 @@ public class MainActivity extends Activity {
 		
 		setContentView(R.layout.activity_main);						
 		
-		mGridLayout2 = (GridLayout) findViewById(R.id.gridLayout2);
-		mGridLayout2.setVisibility(android.view.View.INVISIBLE);
+//		mGridLayout2 = (GridLayout) findViewById(R.id.gridLayout2);
+//		mGridLayout2.setVisibility(android.view.View.INVISIBLE);
 		
-		mGridLayout = (GridLayout) findViewById(R.id.gridLayout1);
+//		mGridLayout = (GridLayout) findViewById(R.id.gridLayout1);
 		mVideoThumnail = (ImageView) findViewById(R.id.imageView1);
-		mVideoButton = (ImageButton) findViewById(R.id.imageButton1);
+		mVideoButton = (ImageButton) findViewById(R.id.imageButton1);				
 		
-		mVideoListView = (ListView) findViewById(R.id.listView1);
-		this.mVideoListView.setAdapter(new ArrayAdapter<String>(this, R.layout.textview, strs));
-		
-		this.mVideoThumnail.setOnClickListener(new View.OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				// TODO Auto-generated method stub				
-				mGridLayout.setVisibility(android.view.View.INVISIBLE);
-				mGridLayout2.setVisibility(android.view.View.VISIBLE);
-			}
-		});
-		
-		
+		this.mVideoThumnail.setOnClickListener(new NavigateToListViewListener()); 
 		
 		mVideoButton.setOnClickListener(new View.OnClickListener() {
 			
@@ -74,6 +62,31 @@ public class MainActivity extends Activity {
 		
 	}
 
+	public class NavigateToListViewListener implements View.OnClickListener
+	{
+		@Override
+		public void onClick(View v) {
+			// TODO Auto-generated method stub				
+			setContentView(R.layout.gridforvideolistview);
+			mVideoListView = (ListView) findViewById(R.id.listView1);
+			mVideoListView.setAdapter(new ArrayAdapter<String>(v.getContext(), R.layout.textview, strs));
+			
+			mReturnButton = (ImageButton) findViewById(R.id.imageButton1);
+			mReturnButton.setOnClickListener(new View.OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					// TODO Auto-generated method stub
+					setContentView(R.layout.activity_main);	
+					mVideoThumnail = (ImageView) findViewById(R.id.imageView1);									
+					mVideoThumnail.setOnClickListener(new NavigateToListViewListener()); 
+					
+				}
+			});
+		}
+	
+	}	
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.

@@ -8,60 +8,26 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.example.test.MainActivity" >
 
-    <GridLayout
-        android:id="@+id/gridLayout1"
+    <SurfaceView
+        android:id="@+id/surfaceView1"
+        android:layout_width="match_parent"
+        android:layout_height="fill_parent" />
+
+    <ImageView
+        android:id="@+id/imageView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/surfaceView1"
+        android:layout_alignParentBottom="true"
+        android:src="@drawable/ic_launcher" />
+
+    <ImageButton
+        android:id="@+id/imageButton1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:columnCount="1" >
-
-        <SurfaceView
-            android:id="@+id/surfaceView1"
-            android:layout_width="254dp"
-            android:layout_height="362dp"
-            android:layout_column="0"
-            android:layout_gravity="left|top"
-            android:layout_row="0" />
-
-        <ImageButton
-            android:id="@+id/imageButton1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_column="0"
-            android:layout_gravity="center_horizontal|top"
-            android:layout_row="1"
-            android:contentDescription="@string/video_button"
-            android:src="@android:drawable/ic_media_play" />
-
-        <ImageView
-            android:id="@+id/imageView1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_column="0"
-            android:layout_gravity="left|top"
-            android:layout_marginBottom="85dp"
-            android:layout_marginRight="121dp"
-            android:layout_row="1"
-            android:src="@drawable/ic_launcher" />
-
-    </GridLayout>
-
-    <GridLayout
-        android:id="@+id/gridLayout2"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:columnCount="1" >
-
-        <ListView
-            android:id="@+id/listView1"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="fill_horizontal" >
-        </ListView>
-
-    </GridLayout>
+        android:layout_centerHorizontal="true"
+        android:contentDescription="@string/video_button"
+        android:src="@android:drawable/ic_media_play" />
 
 </RelativeLayout>
