@@ -2,9 +2,8 @@ package com.example.cardvr;
 
 import java.util.ArrayList;
 
-import com.example.test.R;
-
 import android.app.Activity;
+import android.content.Intent;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.view.Menu;
@@ -12,28 +11,20 @@ import android.view.MenuItem;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.Window;
-import android.widget.ArrayAdapter;
-import android.widget.GridLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ListAdapter;
-import android.widget.ListView;
+import android.widget.TextView;
+
+import com.example.test.R;
 
 
 public class MainActivity extends Activity {
 	private SurfaceView mPreviewSV = null; //‘§¿¿SurfaceView  
 	private ImageView mVideoThumnail = null;
 	private ImageButton mVideoButton = null;
-	
-	private ListView mVideoListView = null;
-	private ImageButton mReturnButton = null;
-	
+	private TextView mTextView = null;
 	private Camera mCamera = null;
 	private ArrayList<View> mListViewChildren = null;
-		
-	private static final String[] strs = new String[] {
-	    "first1", "second2", "third3", "fourth", "fifth"
-	    };
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +40,15 @@ public class MainActivity extends Activity {
 		mVideoThumnail = (ImageView) findViewById(R.id.imageView1);
 		mVideoButton = (ImageButton) findViewById(R.id.imageButton1);				
 		
-		this.mVideoThumnail.setOnClickListener(new NavigateToListViewListener()); 
+		this.mVideoThumnail.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				Intent intent = new Intent(MainActivity.this, ListViewActivity.class);
+				startActivityForResult(intent, 0);
+			}
+		}); 
 		
 		mVideoButton.setOnClickListener(new View.OnClickListener() {
 			
@@ -61,28 +60,41 @@ public class MainActivity extends Activity {
 		});
 		
 	}
-
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data)
+	{
+		String msgFromListViewAct = data.getExtras().getString("Test");
+		switch (resultCode) {
+		case 0: {
+//			mTextView = (TextView) findViewById(R.id.textView1);
+//			mTextView.setText(msgFromListViewAct);
+			break;
+		}
+		default:
+			break;
+		}
+	}
 	public class NavigateToListViewListener implements View.OnClickListener
 	{
 		@Override
 		public void onClick(View v) {
 			// TODO Auto-generated method stub				
-			setContentView(R.layout.gridforvideolistview);
-			mVideoListView = (ListView) findViewById(R.id.listView1);
-			mVideoListView.setAdapter(new ArrayAdapter<String>(v.getContext(), R.layout.textview, strs));
 			
-			mReturnButton = (ImageButton) findViewById(R.id.imageButton1);
-			mReturnButton.setOnClickListener(new View.OnClickListener() {
-				
-				@Override
-				public void onClick(View v) {
-					// TODO Auto-generated method stub
-					setContentView(R.layout.activity_main);	
-					mVideoThumnail = (ImageView) findViewById(R.id.imageView1);									
-					mVideoThumnail.setOnClickListener(new NavigateToListViewListener()); 
-					
-				}
-			});
+			
+			
+//			mReturnButton = (ImageButton) findViewById(R.id.imageButton1);
+//			mReturnButton.setOnClickListener(new View.OnClickListener() {
+//				
+//				@Override
+//				public void onClick(View v) {
+//					// TODO Auto-generated method stub
+//					setContentView(R.layout.activity_main);	
+//					mVideoThumnail = (ImageView) findViewById(R.id.imageView1);									
+//					mVideoThumnail.setOnClickListener(new NavigateToListViewListener()); 
+//					
+//				}
+//			});
 		}
 	
 	}	
