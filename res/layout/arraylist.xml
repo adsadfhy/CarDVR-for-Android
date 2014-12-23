@@ -3,19 +3,14 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent" android:layout_height="wrap_content">
 
-	<ImageButton
-	    android:id="@+id/array_button"
+	<ImageView
+	    android:id="@+id/array_image"
 	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content"
-	    android:layout_centerVertical="true"
-	    android:src="@android:drawable/ic_media_play" />
-
-	<ImageView android:id="@+id/array_image"
-		android:layout_toRightOf="@+id/array_button"
-		android:layout_width="wrap_content" android:layout_height="fill_parent"
-		android:layout_alignParentTop="true" android:layout_alignParentBottom="true"
-		android:adjustViewBounds="true"
-		android:padding="2dip" />
+	    android:layout_height="fill_parent"
+	    android:layout_alignParentBottom="true"
+	    android:layout_alignParentTop="true"
+	    android:adjustViewBounds="true"
+	    android:padding="2dip" />
 
 	<TextView
 	    android:id="@+id/array_text"

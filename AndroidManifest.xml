@@ -36,6 +36,15 @@
             android:name="com.example.cardvr.ListViewActivity"
             android:label="@string/title_activity_list_view" >
         </activity>
+        <activity
+            android:name="com.example.cardvr.PlayVideoActivity"
+            android:label="@string/title_activity_play_video" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

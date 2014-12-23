@@ -1,5 +1,6 @@
 package com.example.cardvr;
 
+import java.io.File;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +19,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Images;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,6 +43,7 @@ public class ListViewActivity extends Activity {
 
 	private ArrayList<Bitmap> mVideoThumbnailers = null;
 	private ArrayList<String> mVideoStartTime = null;
+	private ArrayList<String> mVideoPaths = null;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -50,6 +53,7 @@ public class ListViewActivity extends Activity {
 
 		mVideoThumbnailers = new ArrayList<Bitmap>();
 		mVideoStartTime = new ArrayList<String>();
+		mVideoPaths = new ArrayList<String>();
 		
 		InitialVideoThumbnails();
 
@@ -110,12 +114,17 @@ public class ListViewActivity extends Activity {
 
 				Bitmap thumbnail = MediaStore.Video.Thumbnails.getThumbnail(
 						cr, id, Images.Thumbnails.MICRO_KIND,
-						options);		
+						options);	
+				mVideoThumbnailers.add(thumbnail);
+				
 				String title = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME));
 				String timeMillis = title.substring(3, title.indexOf(".3gp"));				
 				Date date = new Date(Long.parseLong(timeMillis));
 				mVideoStartTime.add(date.toLocaleString());
-				mVideoThumbnailers.add(thumbnail);
+				
+				String videoPath = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA));			
+				mVideoPaths.add(videoPath);
+				
 			} while (cursor.moveToNext());
 		}
 		cursor.close();		
@@ -155,25 +164,28 @@ public class ListViewActivity extends Activity {
 			ImageView image = null;
 			TextView title = null;
 			TextView text = null;
-			ImageButton button = null;
 			if (convertView == null) {
 				convertView = LayoutInflater.from(mContext).inflate(
 						mTextViewResourceID, null);				
 			}
 			image = (ImageView) convertView.findViewById(R.id.array_image);
-			title = (TextView) convertView.findViewById(R.id.array_title);
-			text = (TextView) convertView.findViewById(R.id.array_text);
-			button = (ImageButton) convertView
-					.findViewById(R.id.array_button);
-			button.setOnClickListener(new OnClickListener() {
-
+			image.setOnClickListener(new OnClickListener() {
+				
 				@Override
-				public void onClick(View arg0) {
+				public void onClick(View v) {
+					// TODO Auto-generated method stub
 					Toast.makeText(arrayList, "您点击的第" + position + "个按钮",
 							Toast.LENGTH_LONG).show();
-
+//					Uri uri = Uri.parse(mVideoPaths.get(position));  
+//					// use system media player 
+//				    Intent intent = new Intent(Intent.ACTION_VIEW); 
+//				    Log.v("URI:::::::::", uri.toString()); 
+//				    intent.setDataAndType(uri, "video/3gpp"); 
+//				    startActivity(intent);
 				}
 			});
+			title = (TextView) convertView.findViewById(R.id.array_title);
+			text = (TextView) convertView.findViewById(R.id.array_text);
 			
 			int colorPos = position % colors.length;
 			convertView.setBackgroundColor(colors[colorPos]);

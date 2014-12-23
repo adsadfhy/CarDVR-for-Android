@@ -7,5 +7,6 @@
     <string name="button_OK">OK</string>
     <string name="video_button">start/stop video</string>
     <string name="title_activity_list_view">ListViewActivity</string>
+    <string name="title_activity_play_video">PlayVideoActivity</string>
 
 </resources>
