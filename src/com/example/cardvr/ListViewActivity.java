@@ -1,11 +1,22 @@
 package com.example.cardvr;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.example.test.R;
 
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.provider.MediaStore.Images;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,12 +38,19 @@ public class ListViewActivity extends Activity {
 	private String[] mListStr = { "雨松MOMO", "男", "25", "北京",
 			"xuanyusong@gmail.com" };
 
+	private ArrayList<Bitmap> mVideoThumbnailers = null;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		super.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		arrayList = this;
 		setContentView(R.layout.activity_list_view);
+
+		mVideoThumbnailers = new ArrayList<Bitmap>();
+
+		InitialVideoThumbnails();
+
 		mVideoListView = (ListView) findViewById(R.id.listView1);
 		myAdapter = new MyListAdapter(this, R.layout.arraylist);
 		mVideoListView.setAdapter(myAdapter);
@@ -57,6 +75,45 @@ public class ListViewActivity extends Activity {
 
 	}
 
+	private void InitialVideoThumbnails() {
+		// MediaStore.Video.Thumbnails.DATA:视频缩略图的文件路径
+		String[] thumbColumns = { MediaStore.Video.Thumbnails.DATA,
+				MediaStore.Video.Thumbnails.VIDEO_ID };
+
+		// MediaStore.Video.Media.DATA：视频文件路径；
+		// MediaStore.Video.Media.DISPLAY_NAME : 视频文件名，如 testVideo.mp4
+		// MediaStore.Video.Media.TITLE: 视频标题 : testVideo
+		String[] mediaColumns = { MediaStore.Video.Media._ID,
+				MediaStore.Video.Media.DATA, MediaStore.Video.Media.TITLE
+				};
+		// selection: 指定查询条件
+		String selection = MediaStore.Video.Media.DATA + " like '%mnt/sdcard/DVR%'";
+		// 设定查询目录
+		String path = Environment.getExternalStorageDirectory() + "/DVR";
+		// 定义selectionArgs：
+		String[] selectionArgs = { path};
+
+		ContentResolver cr = this.getContentResolver();
+		Cursor cursor = cr.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+				null, selection, null, null);
+
+		BitmapFactory.Options options = new BitmapFactory.Options();
+		options.inDither = false;
+		options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+
+		if (cursor.moveToFirst()) {
+			do {
+				int id = cursor.getInt(cursor
+						.getColumnIndex(MediaStore.Video.Media._ID));
+
+				Bitmap thumbnail = MediaStore.Video.Thumbnails.getThumbnail(
+						cr, id, Images.Thumbnails.MICRO_KIND,
+						options);
+				mVideoThumbnailers.add(thumbnail);
+			} while (cursor.moveToNext());
+		}
+	}
+
 	public class MyListAdapter extends ArrayAdapter<Object> {
 		int mTextViewResourceID = 0;
 		private Context mContext;
@@ -70,7 +127,7 @@ public class ListViewActivity extends Activity {
 		private int[] colors = new int[] { 0xff626569, 0xff4f5257 };
 
 		public int getCount() {
-			return mListStr.length;
+			return mVideoThumbnailers.size();
 		}
 
 		@Override
@@ -88,35 +145,38 @@ public class ListViewActivity extends Activity {
 
 		public View getView(final int position, View convertView,
 				ViewGroup parent) {
-			ImageView iamge = null;
+			ImageView image = null;
 			TextView title = null;
 			TextView text = null;
 			ImageButton button = null;
 			if (convertView == null) {
 				convertView = LayoutInflater.from(mContext).inflate(
-						mTextViewResourceID, null);
-				iamge = (ImageView) convertView.findViewById(R.id.array_image);
-				title = (TextView) convertView.findViewById(R.id.array_title);
-				text = (TextView) convertView.findViewById(R.id.array_text);
-				button = (ImageButton) convertView.findViewById(R.id.array_button);
-				button.setOnClickListener(new OnClickListener() {
-
-					@Override
-					public void onClick(View arg0) {
-						Toast.makeText(arrayList, "您点击的第" + position + "个按钮",
-								Toast.LENGTH_LONG).show();
-
-					}
-				});
+						mTextViewResourceID, null);				
 			}
+			image = (ImageView) convertView.findViewById(R.id.array_image);
+			title = (TextView) convertView.findViewById(R.id.array_title);
+			text = (TextView) convertView.findViewById(R.id.array_text);
+			button = (ImageButton) convertView
+					.findViewById(R.id.array_button);
+			button.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View arg0) {
+					Toast.makeText(arrayList, "您点击的第" + position + "个按钮",
+							Toast.LENGTH_LONG).show();
+
+				}
+			});
+			
 			int colorPos = position % colors.length;
 			convertView.setBackgroundColor(colors[colorPos]);
-			title.setText(mListTitle[position]);
-			text.setText(mListStr[position]);
-			if (colorPos == 0)
-				iamge.setImageResource(R.drawable.jay);
-			else
-				iamge.setImageResource(R.drawable.image);
+			title.setText(mListTitle[0]);
+			text.setText(mListStr[0]);
+			image.setImageBitmap(mVideoThumbnailers.get(position));
+			// if (colorPos == 0)
+			// iamge.setImageResource(R.drawable.jay);
+			// else
+			// iamge.setImageResource(R.drawable.image);
 			return convertView;
 		}
 	}
