@@ -1,5 +1,6 @@
 package com.example.cardvr;
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,12 +35,12 @@ public class ListViewActivity extends Activity {
 	private ImageButton mReturnButton = null;
 	private MyListAdapter myAdapter = null;
 	ListViewActivity arrayList = null;
-	private String[] mListTitle = { "姓名", "性别", "年龄", "居住地", "邮箱" };
+	private String[] mListTitle = { "时间", "性别", "年龄", "居住地", "邮箱" };
 	private String[] mListStr = { "雨松MOMO", "男", "25", "北京",
 			"xuanyusong@gmail.com" };
 
 	private ArrayList<Bitmap> mVideoThumbnailers = null;
-
+	private ArrayList<String> mVideoStartTime = null;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -48,7 +49,8 @@ public class ListViewActivity extends Activity {
 		setContentView(R.layout.activity_list_view);
 
 		mVideoThumbnailers = new ArrayList<Bitmap>();
-
+		mVideoStartTime = new ArrayList<String>();
+		
 		InitialVideoThumbnails();
 
 		mVideoListView = (ListView) findViewById(R.id.listView1);
@@ -86,11 +88,11 @@ public class ListViewActivity extends Activity {
 		String[] mediaColumns = { MediaStore.Video.Media._ID,
 				MediaStore.Video.Media.DATA, MediaStore.Video.Media.TITLE
 				};
-		// selection: 指定查询条件
+		// selection
 		String selection = MediaStore.Video.Media.DATA + " like '%mnt/sdcard/DVR%'";
-		// 设定查询目录
+		// set query directory
 		String path = Environment.getExternalStorageDirectory() + "/DVR";
-		// 定义selectionArgs：
+		// selectionArgs：
 		String[] selectionArgs = { path};
 
 		ContentResolver cr = this.getContentResolver();
@@ -108,10 +110,15 @@ public class ListViewActivity extends Activity {
 
 				Bitmap thumbnail = MediaStore.Video.Thumbnails.getThumbnail(
 						cr, id, Images.Thumbnails.MICRO_KIND,
-						options);
+						options);		
+				String title = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME));
+				String timeMillis = title.substring(3, title.indexOf(".3gp"));				
+				Date date = new Date(Long.parseLong(timeMillis));
+				mVideoStartTime.add(date.toLocaleString());
 				mVideoThumbnailers.add(thumbnail);
 			} while (cursor.moveToNext());
 		}
+		cursor.close();		
 	}
 
 	public class MyListAdapter extends ArrayAdapter<Object> {
@@ -171,7 +178,7 @@ public class ListViewActivity extends Activity {
 			int colorPos = position % colors.length;
 			convertView.setBackgroundColor(colors[colorPos]);
 			title.setText(mListTitle[0]);
-			text.setText(mListStr[0]);
+			text.setText(mVideoStartTime.get(position));
 			image.setImageBitmap(mVideoThumbnailers.get(position));
 			// if (colorPos == 0)
 			// iamge.setImageResource(R.drawable.jay);

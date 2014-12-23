@@ -75,7 +75,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 
 	}
 
-	public void updateGallery(String filename)// filename是我们的文件全名，包括后缀哦
+	public void updateGallery(String filename)
 	{
 		MediaScannerConnection.scanFile(this, new String[] { filename }, null,
 				new MediaScannerConnection.OnScanCompletedListener() {
@@ -107,8 +107,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 				else
 					mMediaRecorder.reset();
 
-				Parameters parameters = mCamera.getParameters();
-				List<Size> sizes = parameters.getSupportedVideoSizes();
+//				Parameters parameters = mCamera.getParameters();
+//				List<Size> sizes = parameters.getSupportedVideoSizes();
 
 				// Unlock the camera object before passing it to media recorder.
 				mCamera.unlock();
@@ -118,9 +118,9 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 				// .3gp
 				mMediaRecorder
 						.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-				// 视频编码
+				// video encoder
 				mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
-				// 声音编码
+				// audio encoder
 				mMediaRecorder
 						.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
 
@@ -133,7 +133,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 				File videoFile = new File(dir, "dvr"
 						+ System.currentTimeMillis() + ".3gp");
 				mMediaRecorder.setOutputFile(videoFile.getPath());
-
+				
 				mMediaRecorder.setVideoSize(960, 720);
 				mMediaRecorder.setVideoFrameRate(videoFramesPerSecond);
 				mMediaRecorder.setPreviewDisplay(mSurfaceHolder.getSurface());
