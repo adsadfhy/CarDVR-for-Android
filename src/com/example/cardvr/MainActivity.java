@@ -58,7 +58,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 		mSurfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
 		mVideoThumnail = (ImageView) findViewById(R.id.imageView1);
-		mVideoButton = (ImageButton) findViewById(R.id.imageButton1);
+		mVideoButton = (ImageButton) findViewById(R.id.goBackImageButton);
 
 		this.mVideoThumnail.setOnClickListener(new View.OnClickListener() {
 

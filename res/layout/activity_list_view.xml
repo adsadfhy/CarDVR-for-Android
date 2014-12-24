@@ -16,7 +16,7 @@
     </ListView>
 
     <ImageButton
-        android:id="@+id/imageButton1"
+        android:id="@+id/goBackImageButton"
         android:layout_width="wrap_content"
         android:layout_height="fill_parent"
         android:layout_gravity="bottom|left"

@@ -61,7 +61,7 @@ public class ListViewActivity extends Activity {
 		myAdapter = new MyListAdapter(this, R.layout.arraylist);
 		mVideoListView.setAdapter(myAdapter);
 
-		mReturnButton = (ImageButton) findViewById(R.id.imageButton1);
+		mReturnButton = (ImageButton) findViewById(R.id.goBackImageButton);
 		mReturnButton.setOnClickListener(new View.OnClickListener() {
 
 			@Override
@@ -73,9 +73,7 @@ public class ListViewActivity extends Activity {
 
 				Intent returnIntent = new Intent(ListViewActivity.this,
 						MainActivity.class);
-				returnIntent.putExtra("Test", "Hello, CarDVR!");
-				setResult(0, returnIntent);
-				finish();
+				startActivity(returnIntent);
 			}
 		});
 
@@ -182,6 +180,9 @@ public class ListViewActivity extends Activity {
 //				    Log.v("URI:::::::::", uri.toString()); 
 //				    intent.setDataAndType(uri, "video/3gpp"); 
 //				    startActivity(intent);
+					Intent intent = new Intent(ListViewActivity.this, PlayVideoActivity.class);
+					intent.setData(Uri.parse(mVideoPaths.get(position)));
+					startActivity(intent);
 				}
 			});
 			title = (TextView) convertView.findViewById(R.id.array_title);
