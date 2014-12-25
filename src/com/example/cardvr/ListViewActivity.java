@@ -3,6 +3,9 @@ package com.example.cardvr;
 import java.io.File;
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import com.example.test.R;
@@ -41,9 +44,21 @@ public class ListViewActivity extends Activity {
 	private String[] mListStr = { "雨松MOMO", "男", "25", "北京",
 			"xuanyusong@gmail.com" };
 
-	private ArrayList<Bitmap> mVideoThumbnailers = null;
-	private ArrayList<String> mVideoStartTime = null;
-	private ArrayList<String> mVideoPaths = null;
+	private ArrayList<VideoInfo> mVideoInfoList = null;
+
+	protected class VideoInfo {
+		public VideoInfo(Bitmap thumbnail, Date startTime, String path) {
+			// TODO Auto-generated constructor stub
+			mThumbnail = thumbnail;
+			mStartTime = startTime;
+			mPath = path;
+		}
+
+		public Bitmap mThumbnail;
+		public Date mStartTime;
+		public String mPath;
+	}
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -51,10 +66,8 @@ public class ListViewActivity extends Activity {
 		arrayList = this;
 		setContentView(R.layout.activity_list_view);
 
-		mVideoThumbnailers = new ArrayList<Bitmap>();
-		mVideoStartTime = new ArrayList<String>();
-		mVideoPaths = new ArrayList<String>();
-		
+		mVideoInfoList = new ArrayList<VideoInfo>();
+
 		InitialVideoThumbnails();
 
 		mVideoListView = (ListView) findViewById(R.id.listView1);
@@ -88,14 +101,14 @@ public class ListViewActivity extends Activity {
 		// MediaStore.Video.Media.DISPLAY_NAME : 视频文件名，如 testVideo.mp4
 		// MediaStore.Video.Media.TITLE: 视频标题 : testVideo
 		String[] mediaColumns = { MediaStore.Video.Media._ID,
-				MediaStore.Video.Media.DATA, MediaStore.Video.Media.TITLE
-				};
+				MediaStore.Video.Media.DATA, MediaStore.Video.Media.TITLE };
 		// selection
-		String selection = MediaStore.Video.Media.DATA + " like '%mnt/sdcard/DVR%'";
+		String selection = MediaStore.Video.Media.DATA
+				+ " like '%mnt/sdcard/DVR%'";
 		// set query directory
 		String path = Environment.getExternalStorageDirectory() + "/DVR";
 		// selectionArgs：
-		String[] selectionArgs = { path};
+		String[] selectionArgs = { path };
 
 		ContentResolver cr = this.getContentResolver();
 		Cursor cursor = cr.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
@@ -110,22 +123,41 @@ public class ListViewActivity extends Activity {
 				int id = cursor.getInt(cursor
 						.getColumnIndex(MediaStore.Video.Media._ID));
 
-				Bitmap thumbnail = MediaStore.Video.Thumbnails.getThumbnail(
-						cr, id, Images.Thumbnails.MICRO_KIND,
-						options);	
-				mVideoThumbnailers.add(thumbnail);
-				
-				String title = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME));
-				String timeMillis = title.substring(3, title.indexOf(".3gp"));				
+				Bitmap thumbnail = MediaStore.Video.Thumbnails.getThumbnail(cr,
+						id, Images.Thumbnails.MICRO_KIND, options);
+				// mVideoThumbnailers.add(thumbnail);
+
+				String title = cursor
+						.getString(cursor
+								.getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME));
+				String timeMillis = title.substring(3, title.indexOf(".3gp"));
 				Date date = new Date(Long.parseLong(timeMillis));
-				mVideoStartTime.add(date.toLocaleString());
-				
-				String videoPath = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA));			
-				mVideoPaths.add(videoPath);
-				
+				// mVideoStartTime.add(date.toLocaleString());
+
+				String videoPath = cursor.getString(cursor
+						.getColumnIndexOrThrow(MediaStore.Video.Media.DATA));
+				// mVideoPaths.add(videoPath);
+
+				this.mVideoInfoList.add(new VideoInfo(thumbnail, date,
+						videoPath));
+				Collections.sort(this.mVideoInfoList, new VideoComparator());
+
 			} while (cursor.moveToNext());
 		}
-		cursor.close();		
+		cursor.close();
+	}
+
+	public class VideoComparator implements Comparator<VideoInfo> {
+
+		@Override
+		public int compare(VideoInfo lhs, VideoInfo rhs) {
+			// TODO Auto-generated method stub
+			if (lhs.mStartTime.after(rhs.mStartTime)) {
+				return -1;
+			} else {
+				return 1;
+			}
+		}
 	}
 
 	public class MyListAdapter extends ArrayAdapter<Object> {
@@ -141,7 +173,7 @@ public class ListViewActivity extends Activity {
 		private int[] colors = new int[] { 0xff626569, 0xff4f5257 };
 
 		public int getCount() {
-			return mVideoThumbnailers.size();
+			return mVideoInfoList.size();
 		}
 
 		@Override
@@ -164,35 +196,36 @@ public class ListViewActivity extends Activity {
 			TextView text = null;
 			if (convertView == null) {
 				convertView = LayoutInflater.from(mContext).inflate(
-						mTextViewResourceID, null);				
+						mTextViewResourceID, null);
 			}
 			image = (ImageView) convertView.findViewById(R.id.array_image);
 			image.setOnClickListener(new OnClickListener() {
-				
+
 				@Override
 				public void onClick(View v) {
 					// TODO Auto-generated method stub
-					Toast.makeText(arrayList, "您点击的第" + position + "个按钮",
-							Toast.LENGTH_LONG).show();
-//					Uri uri = Uri.parse(mVideoPaths.get(position));  
-//					// use system media player 
-//				    Intent intent = new Intent(Intent.ACTION_VIEW); 
-//				    Log.v("URI:::::::::", uri.toString()); 
-//				    intent.setDataAndType(uri, "video/3gpp"); 
-//				    startActivity(intent);
-					Intent intent = new Intent(ListViewActivity.this, PlayVideoActivity.class);
-					intent.setData(Uri.parse(mVideoPaths.get(position)));
+					// Toast.makeText(arrayList, "您点击的第" + position + "个按钮",
+					// Toast.LENGTH_LONG).show();
+					// Uri uri = Uri.parse(mVideoPaths.get(position));
+					// // use system media player
+					// Intent intent = new Intent(Intent.ACTION_VIEW);
+					// Log.v("URI:::::::::", uri.toString());
+					// intent.setDataAndType(uri, "video/3gpp");
+					// startActivity(intent);
+					Intent intent = new Intent(ListViewActivity.this,
+							PlayVideoActivity.class);
+					intent.setData(Uri.parse(mVideoInfoList.get(position).mPath));
 					startActivity(intent);
 				}
 			});
 			title = (TextView) convertView.findViewById(R.id.array_title);
 			text = (TextView) convertView.findViewById(R.id.array_text);
-			
+
 			int colorPos = position % colors.length;
 			convertView.setBackgroundColor(colors[colorPos]);
-			title.setText(mListTitle[0]);
-			text.setText(mVideoStartTime.get(position));
-			image.setImageBitmap(mVideoThumbnailers.get(position));
+			title.setText(mVideoInfoList.get(position).mPath);
+			text.setText(mVideoInfoList.get(position).mStartTime.toLocaleString());
+			image.setImageBitmap(mVideoInfoList.get(position).mThumbnail);
 			// if (colorPos == 0)
 			// iamge.setImageResource(R.drawable.jay);
 			// else

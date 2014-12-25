@@ -7,8 +7,13 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
 import android.hardware.Camera.Size;
@@ -16,9 +21,12 @@ import android.media.CamcorderProfile;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaRecorder;
 import android.media.MediaScannerConnection;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
+import android.provider.MediaStore.Images;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -48,7 +56,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 		super.requestWindowFeature(Window.FEATURE_NO_TITLE);
 
 		setContentView(R.layout.activity_main);
-
+		this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+		
 		mPreviewSV = (SurfaceView) this.findViewById(R.id.surfaceView1);
 
 		mSurfaceHolder = mPreviewSV.getHolder();
@@ -58,7 +67,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 		mSurfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
 		mVideoThumnail = (ImageView) findViewById(R.id.imageView1);
-		mVideoButton = (ImageButton) findViewById(R.id.goBackImageButton);
+		mVideoButton = (ImageButton) findViewById(R.id.imageButton1);
 
 		this.mVideoThumnail.setOnClickListener(new View.OnClickListener() {
 
@@ -75,8 +84,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 
 	}
 
-	public void updateGallery(String filename)
-	{
+	public void updateGallery(String filename) {
 		MediaScannerConnection.scanFile(this, new String[] { filename }, null,
 				new MediaScannerConnection.OnScanCompletedListener() {
 
@@ -97,6 +105,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 		private final int maxDurationInMs = 100000;
 		private final long maxFileSizeInBytes = 500000;
 		private final int videoFramesPerSecond = 15;
+		private File mVideoFile = null;
 
 		@Override
 		public void onClick(View v) {
@@ -107,8 +116,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 				else
 					mMediaRecorder.reset();
 
-//				Parameters parameters = mCamera.getParameters();
-//				List<Size> sizes = parameters.getSupportedVideoSizes();
+				// Parameters parameters = mCamera.getParameters();
+				// List<Size> sizes = parameters.getSupportedVideoSizes();
 
 				// Unlock the camera object before passing it to media recorder.
 				mCamera.unlock();
@@ -130,10 +139,10 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 					dir.mkdir();
 				}
 
-				File videoFile = new File(dir, "dvr"
-						+ System.currentTimeMillis() + ".3gp");
-				mMediaRecorder.setOutputFile(videoFile.getPath());
-				
+				mVideoFile = new File(dir, "dvr" + System.currentTimeMillis()
+						+ ".3gp");
+				mMediaRecorder.setOutputFile(mVideoFile.getPath());
+
 				mMediaRecorder.setVideoSize(960, 720);
 				mMediaRecorder.setVideoFrameRate(videoFramesPerSecond);
 				mMediaRecorder.setPreviewDisplay(mSurfaceHolder.getSurface());
@@ -162,6 +171,12 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 				mMediaRecorder = null;
 				updateGallery(Environment.getExternalStorageDirectory()
 						+ "/DVR");
+				
+				Bitmap thumbnail = ThumbnailUtils.createVideoThumbnail(this.mVideoFile.getAbsolutePath(), Images.Thumbnails.MICRO_KIND);
+				if(thumbnail != null){
+					mVideoThumnail.setImageBitmap(thumbnail);	
+				}	
+				
 				this.isRecording = false;
 				if (mCamera != null) {
 					try {
@@ -171,6 +186,35 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 						e.printStackTrace();
 					}
 				}
+			}
+		}
+
+		private Bitmap GetCurrentVideoThumbnail() {
+			// selection
+			String selection = MediaStore.Video.Media.DATA + " = '"
+					+ this.mVideoFile + "'";
+
+			ContentResolver cr = getContentResolver();
+			Cursor cursor = cr.query(
+					MediaStore.Video.Media.EXTERNAL_CONTENT_URI, new String[]{MediaStore.Video.Media._ID},
+					selection, null, null);
+
+			BitmapFactory.Options options = new BitmapFactory.Options();
+			options.inDither = false;
+			options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+
+			if (cursor.moveToFirst()) {
+				int id = cursor.getInt(cursor
+						.getColumnIndex(MediaStore.Video.Media._ID));
+
+				Bitmap thumbnail = MediaStore.Video.Thumbnails.getThumbnail(cr,
+						id, Images.Thumbnails.MICRO_KIND, options);
+				cursor.close();
+				return thumbnail;
+			}
+			else{
+				cursor.close();
+				return null;
 			}
 		}
 	}
