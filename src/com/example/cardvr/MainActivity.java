@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import android.app.Activity;
 import android.content.ContentResolver;
@@ -57,7 +59,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 
 		setContentView(R.layout.activity_main);
 		this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-		
+
 		mPreviewSV = (SurfaceView) this.findViewById(R.id.surfaceView1);
 
 		mSurfaceHolder = mPreviewSV.getHolder();
@@ -85,17 +87,23 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 	}
 
 	public void updateGallery(String filename) {
-		MediaScannerConnection.scanFile(this, new String[] { filename }, null,
-				new MediaScannerConnection.OnScanCompletedListener() {
 
-					@Override
-					public void onScanCompleted(String path, Uri uri) {
-						// TODO Auto-generated method stub
-						Log.i("ExternalStorage", "Scanned " + path + ":");
-						Log.i("ExternalStorage", "-> uri=" + uri);
-					}
+		try {
+			MediaScannerConnection.scanFile(this, new String[] { filename },
+					null, new MediaScannerConnection.OnScanCompletedListener() {
 
-				});
+						@Override
+						public void onScanCompleted(String path, Uri uri) {
+							// TODO Auto-generated method stub
+							Log.i("ExternalStorage", "Scanned " + path + ":");
+							Log.i("ExternalStorage", "-> uri=" + uri);
+						}
+
+					});
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	protected class RecordVideoClickListener implements View.OnClickListener {
@@ -107,53 +115,25 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 		private final int videoFramesPerSecond = 15;
 		private File mVideoFile = null;
 
+		Timer timer = new Timer();
+
 		@Override
 		public void onClick(View v) {
 			// TODO Auto-generated method stub
 			if (!isRecording) {
 				if (mMediaRecorder == null)
 					mMediaRecorder = new MediaRecorder();
-				else
+				else {
 					mMediaRecorder.reset();
-
-				// Parameters parameters = mCamera.getParameters();
-				// List<Size> sizes = parameters.getSupportedVideoSizes();
-
+				}
 				// Unlock the camera object before passing it to media recorder.
 				mCamera.unlock();
-				mMediaRecorder.setCamera(mCamera);
-				mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
-				mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-				// .3gp
-				mMediaRecorder
-						.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-				// video encoder
-				mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
-				// audio encoder
-				mMediaRecorder
-						.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-
-				File dir = new File(Environment.getExternalStorageDirectory()
-						+ "/DVR");
-				if (!dir.exists()) {
-					dir.mkdir();
-				}
-
-				mVideoFile = new File(dir, "dvr" + System.currentTimeMillis()
-						+ ".3gp");
-				mMediaRecorder.setOutputFile(mVideoFile.getPath());
-
-				mMediaRecorder.setVideoSize(960, 720);
-				mMediaRecorder.setVideoFrameRate(videoFramesPerSecond);
-				mMediaRecorder.setPreviewDisplay(mSurfaceHolder.getSurface());
-				mMediaRecorder.setMaxDuration(maxDurationInMs);
-				// mMediaRecorder.setProfile(CamcorderProfile
-				// .get(CamcorderProfile.QUALITY_HIGH));
-				// mMediaRecorder.setMaxFileSize(maxFileSizeInBytes);
+				ConfigureMediaRecorder();
 
 				try {
 					mMediaRecorder.prepare();
-					mMediaRecorder.start(); // Recording is now started
+					mMediaRecorder.start(); // Recording is now
+											// started
 					isRecording = true;
 				} catch (IllegalStateException e) {
 					Log.e(TAG, e.getMessage());
@@ -164,29 +144,110 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 					e.printStackTrace();
 					return;
 				}
-			} else {
-				mMediaRecorder.stop();
-				mMediaRecorder.reset();
-				mMediaRecorder.release();
-				mMediaRecorder = null;
-				updateGallery(Environment.getExternalStorageDirectory()
-						+ "/DVR");
-				
-				Bitmap thumbnail = ThumbnailUtils.createVideoThumbnail(this.mVideoFile.getAbsolutePath(), Images.Thumbnails.MICRO_KIND);
-				if(thumbnail != null){
-					mVideoThumnail.setImageBitmap(thumbnail);	
-				}	
-				
-				this.isRecording = false;
-				if (mCamera != null) {
-					try {
-						mCamera.reconnect();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+
+				TimerTask task = new TimerTask() {
+					@Override
+					public void run() {
+
+						runOnUiThread(new Runnable() { // UI thread
+							@Override
+							public void run() {
+								if (isRecording) {
+									try {
+										mMediaRecorder.stop();
+										mMediaRecorder.reset();
+										try {
+											mCamera.reconnect();
+										} catch (IOException e) {
+											// TODO Auto-generated catch block
+											e.printStackTrace();
+										}
+
+										SetThumnail();
+
+										mCamera.unlock();
+										ConfigureMediaRecorder();
+
+										mMediaRecorder.prepare();
+										mMediaRecorder.start();
+																
+									} catch (IllegalStateException e) {
+										Log.e(TAG, e.getMessage());
+										e.printStackTrace();
+										return;
+									} catch (IOException e) {
+										Log.e(TAG, e.getMessage());
+										e.printStackTrace();
+										return;
+									}
+
+								}
+								else
+								{
+									mMediaRecorder.stop();
+									mMediaRecorder.reset();
+									mMediaRecorder.release();
+									mMediaRecorder = null;	
+									updateGallery(Environment.getExternalStorageDirectory()
+											+ "/DVR");
+									SetThumnail();
+									
+									if (mCamera != null) {
+										try {
+											mCamera.reconnect();
+										} catch (IOException e) {
+											// TODO Auto-generated catch block
+											e.printStackTrace();
+										}
+									}
+									timer.cancel();
+								}
+							}
+						});
 					}
-				}
+				};
+
+				timer.schedule(task, 5000, 5000);
+
+			} else {
+				this.isRecording = false;										
 			}
+		}
+		private void SetThumnail(){
+
+			Bitmap thumbnail = ThumbnailUtils.createVideoThumbnail(
+					mVideoFile.getAbsolutePath(),
+					Images.Thumbnails.MICRO_KIND);
+			if (thumbnail != null) {
+				mVideoThumnail.setImageBitmap(thumbnail);
+			}
+		}
+		private void ConfigureMediaRecorder() {
+			mMediaRecorder.setCamera(mCamera);
+			mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
+			mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+			// .3gp
+			mMediaRecorder
+					.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+			// video encoder
+			mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
+			// audio encoder
+			mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+
+			File dir = new File(Environment.getExternalStorageDirectory()
+					+ "/DVR");
+			if (!dir.exists()) {
+				dir.mkdir();
+			}
+
+			mVideoFile = new File(dir, "dvr" + System.currentTimeMillis()
+					+ ".3gp");
+			mMediaRecorder.setOutputFile(mVideoFile.getPath());
+
+			mMediaRecorder.setVideoSize(960, 720);
+			mMediaRecorder.setVideoFrameRate(videoFramesPerSecond);
+			mMediaRecorder.setPreviewDisplay(mSurfaceHolder.getSurface());
+			mMediaRecorder.setMaxDuration(maxDurationInMs);
 		}
 
 		private Bitmap GetCurrentVideoThumbnail() {
@@ -196,8 +257,9 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 
 			ContentResolver cr = getContentResolver();
 			Cursor cursor = cr.query(
-					MediaStore.Video.Media.EXTERNAL_CONTENT_URI, new String[]{MediaStore.Video.Media._ID},
-					selection, null, null);
+					MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+					new String[] { MediaStore.Video.Media._ID }, selection,
+					null, null);
 
 			BitmapFactory.Options options = new BitmapFactory.Options();
 			options.inDither = false;
@@ -211,8 +273,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 						id, Images.Thumbnails.MICRO_KIND, options);
 				cursor.close();
 				return thumbnail;
-			}
-			else{
+			} else {
 				cursor.close();
 				return null;
 			}

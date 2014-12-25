@@ -54,9 +54,9 @@ public class ListViewActivity extends Activity {
 			mPath = path;
 		}
 
-		public Bitmap mThumbnail;
-		public Date mStartTime;
-		public String mPath;
+		private Bitmap mThumbnail;
+		private Date mStartTime;
+		private String mPath;
 	}
 
 	@Override
