@@ -27,6 +27,8 @@ import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Images;
 import android.util.Log;
@@ -51,7 +53,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 	private ImageButton mVideoButton = null;
 	// private TextView mTextView = null;
 	private Camera mCamera = null;
-
+	private WakeLock mWakeLock = null;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -115,8 +118,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 		private final int videoFramesPerSecond = 15;
 		private File mVideoFile = null;
 
-		Timer timer = new Timer();
-
+		private Timer timer = null;
+		
 		@Override
 		public void onClick(View v) {
 			// TODO Auto-generated method stub
@@ -143,8 +146,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 					Log.e(TAG, e.getMessage());
 					e.printStackTrace();
 					return;
-				}
-
+				}		
+				
 				TimerTask task = new TimerTask() {
 					@Override
 					public void run() {
@@ -180,37 +183,38 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 										e.printStackTrace();
 										return;
 									}
-
 								}
-								else
-								{
-									mMediaRecorder.stop();
-									mMediaRecorder.reset();
-									mMediaRecorder.release();
-									mMediaRecorder = null;	
-									updateGallery(Environment.getExternalStorageDirectory()
-											+ "/DVR");
-									SetThumnail();
+								else{
 									
-									if (mCamera != null) {
-										try {
-											mCamera.reconnect();
-										} catch (IOException e) {
-											// TODO Auto-generated catch block
-											e.printStackTrace();
-										}
-									}
-									timer.cancel();
 								}
 							}
 						});
 					}
 				};
-
-				timer.schedule(task, 5000, 5000);
-
+				
+				timer = new Timer();
+				timer.schedule(task, 5000, 5000);		
+				
 			} else {
-				this.isRecording = false;										
+				timer.cancel();
+				timer = null;
+				this.isRecording = false;	
+				mMediaRecorder.stop();
+				mMediaRecorder.reset();
+				mMediaRecorder.release();
+				mMediaRecorder = null;	
+				updateGallery(Environment.getExternalStorageDirectory()
+						+ "/DVR");
+				SetThumnail();
+				
+				if (mCamera != null) {
+					try {
+						mCamera.reconnect();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}				
 			}
 		}
 		private void SetThumnail(){
@@ -396,4 +400,22 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 			mCamera = null;
 		}
 	}
+	
+	@Override  
+    protected void onResume() {  
+        super.onResume();  
+        PowerManager pManager = ((PowerManager) getSystemService(POWER_SERVICE));  
+        mWakeLock = pManager.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK  
+                | PowerManager.ON_AFTER_RELEASE, TAG);  
+        mWakeLock.acquire();  
+    }  
+      
+    @Override  
+    protected void onPause() {  
+        super.onPause();  
+          
+        if(null != mWakeLock){  
+            mWakeLock.release();  
+        }  
+    }  
 }
