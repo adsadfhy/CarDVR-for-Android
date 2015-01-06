@@ -2,8 +2,6 @@ package com.example.cardvr;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.Date;
-import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -17,10 +15,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.Camera;
-import android.hardware.Camera.Parameters;
 import android.hardware.Camera.Size;
-import android.media.CamcorderProfile;
-import android.media.MediaMetadataRetriever;
 import android.media.MediaRecorder;
 import android.media.MediaScannerConnection;
 import android.media.ThumbnailUtils;
@@ -31,13 +26,17 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Images;
+import android.provider.Settings;
+import android.provider.Settings.SettingNotFoundException;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 
@@ -55,6 +54,13 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 	private Camera mCamera = null;
 	private WakeLock mWakeLock = null;
 	
+	private int mScreenBrightness = 0; 
+	
+	private final int maxDurationInMs = 3 * 60000;
+	private final long maxFileSizeInBytes = 500000;
+	private final int videoFramesPerSecond = 15;
+	private final int recordScreenBrightness = 25;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -62,7 +68,9 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 
 		setContentView(R.layout.activity_main);
 		this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-
+		
+		mScreenBrightness = getScreenBrightness(MainActivity.this);
+		
 		mPreviewSV = (SurfaceView) this.findViewById(R.id.surfaceView1);
 
 		mSurfaceHolder = mPreviewSV.getHolder();
@@ -86,9 +94,16 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 		});
 
 		mVideoButton.setOnClickListener(new RecordVideoClickListener());
-
+		
 	}
 
+	@Override
+	public boolean onTouchEvent(MotionEvent event){
+		setScreenBrightness(MainActivity.this, mScreenBrightness);
+		return true;
+	}
+	
+	
 	public void updateGallery(String filename) {
 
 		try {
@@ -109,19 +124,37 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 		}
 	}
 
+	public static int getScreenBrightness(Activity activity) {
+		int value = 0;
+		ContentResolver cr = activity.getContentResolver();
+		try {
+			value = Settings.System.getInt(cr,
+					Settings.System.SCREEN_BRIGHTNESS);
+		} catch (SettingNotFoundException e) {
+
+		}
+		return value;
+	}
+
+	public static void setScreenBrightness(Activity activity, int value) {
+		WindowManager.LayoutParams params = activity.getWindow()
+				.getAttributes();
+		params.screenBrightness = value / 255f;
+		activity.getWindow().setAttributes(params);
+	}
+
 	protected class RecordVideoClickListener implements View.OnClickListener {
 		private boolean isRecording = false;
 		private MediaRecorder mMediaRecorder = null;
 
-		private final int maxDurationInMs = 100000;
-		private final long maxFileSizeInBytes = 500000;
-		private final int videoFramesPerSecond = 15;
+		
 		private File mVideoFile = null;
 
 		private Timer timer = null;
-		
+
 		@Override
 		public void onClick(View v) {
+
 			// TODO Auto-generated method stub
 			if (!isRecording) {
 				if (mMediaRecorder == null)
@@ -132,11 +165,13 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 				// Unlock the camera object before passing it to media recorder.
 				mCamera.unlock();
 				ConfigureMediaRecorder();
-
+							
 				try {
 					mMediaRecorder.prepare();
-					mMediaRecorder.start(); // Recording is now
-											// started
+					mMediaRecorder.start(); // Recording is now started
+										
+					// lower screen brightness to save battery
+					setScreenBrightness(MainActivity.this, recordScreenBrightness);
 					isRecording = true;
 				} catch (IllegalStateException e) {
 					Log.e(TAG, e.getMessage());
@@ -146,8 +181,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 					Log.e(TAG, e.getMessage());
 					e.printStackTrace();
 					return;
-				}		
-				
+				}
+
 				TimerTask task = new TimerTask() {
 					@Override
 					public void run() {
@@ -173,7 +208,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 
 										mMediaRecorder.prepare();
 										mMediaRecorder.start();
-																
+										setScreenBrightness(MainActivity.this, recordScreenBrightness);
+
 									} catch (IllegalStateException e) {
 										Log.e(TAG, e.getMessage());
 										e.printStackTrace();
@@ -184,29 +220,26 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 										return;
 									}
 								}
-								else{
-									
-								}
 							}
 						});
 					}
 				};
-				
+
 				timer = new Timer();
-				timer.schedule(task, 5000, 5000);		
-				
+				timer.schedule(task, maxDurationInMs, maxDurationInMs);
+
 			} else {
 				timer.cancel();
 				timer = null;
-				this.isRecording = false;	
+				this.isRecording = false;
 				mMediaRecorder.stop();
 				mMediaRecorder.reset();
 				mMediaRecorder.release();
-				mMediaRecorder = null;	
+				mMediaRecorder = null;
 				updateGallery(Environment.getExternalStorageDirectory()
 						+ "/DVR");
 				SetThumnail();
-				
+
 				if (mCamera != null) {
 					try {
 						mCamera.reconnect();
@@ -214,18 +247,20 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-				}				
+				}
+				setScreenBrightness(MainActivity.this, mScreenBrightness);
 			}
 		}
-		private void SetThumnail(){
+
+		private void SetThumnail() {
 
 			Bitmap thumbnail = ThumbnailUtils.createVideoThumbnail(
-					mVideoFile.getAbsolutePath(),
-					Images.Thumbnails.MICRO_KIND);
+					mVideoFile.getAbsolutePath(), Images.Thumbnails.MICRO_KIND);
 			if (thumbnail != null) {
 				mVideoThumnail.setImageBitmap(thumbnail);
 			}
 		}
+
 		private void ConfigureMediaRecorder() {
 			mMediaRecorder.setCamera(mCamera);
 			mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
@@ -400,22 +435,24 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 			mCamera = null;
 		}
 	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		PowerManager pManager = ((PowerManager) getSystemService(POWER_SERVICE));
+		mWakeLock = pManager.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK
+				| PowerManager.ON_AFTER_RELEASE, TAG);
+		mWakeLock.acquire();
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+
+		if (null != mWakeLock) {
+			mWakeLock.release();
+		}
+	}
 	
-	@Override  
-    protected void onResume() {  
-        super.onResume();  
-        PowerManager pManager = ((PowerManager) getSystemService(POWER_SERVICE));  
-        mWakeLock = pManager.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK  
-                | PowerManager.ON_AFTER_RELEASE, TAG);  
-        mWakeLock.acquire();  
-    }  
-      
-    @Override  
-    protected void onPause() {  
-        super.onPause();  
-          
-        if(null != mWakeLock){  
-            mWakeLock.release();  
-        }  
-    }  
+	
 }
