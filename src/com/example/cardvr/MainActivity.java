@@ -2,7 +2,6 @@ package com.example.cardvr;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -11,11 +10,8 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.hardware.Camera;
-import android.hardware.Camera.Size;
 import android.media.MediaRecorder;
 import android.media.MediaScannerConnection;
 import android.media.ThumbnailUtils;
@@ -24,7 +20,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
-import android.provider.MediaStore;
 import android.provider.MediaStore.Images;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
@@ -57,7 +52,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 	private int mScreenBrightness = 0; 
 	
 	private final int maxDurationInMs = 3 * 60000;
-	private final long maxFileSizeInBytes = 500000;
+//	private final long maxFileSizeInBytes = 500000;
 	private final int videoFramesPerSecond = 15;
 	private final int recordScreenBrightness = 25;
 	
@@ -146,10 +141,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 	protected class RecordVideoClickListener implements View.OnClickListener {
 		private boolean isRecording = false;
 		private MediaRecorder mMediaRecorder = null;
-
-		
 		private File mVideoFile = null;
-
 		private Timer timer = null;
 
 		@Override
@@ -289,34 +281,34 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 			mMediaRecorder.setMaxDuration(maxDurationInMs);
 		}
 
-		private Bitmap GetCurrentVideoThumbnail() {
-			// selection
-			String selection = MediaStore.Video.Media.DATA + " = '"
-					+ this.mVideoFile + "'";
-
-			ContentResolver cr = getContentResolver();
-			Cursor cursor = cr.query(
-					MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-					new String[] { MediaStore.Video.Media._ID }, selection,
-					null, null);
-
-			BitmapFactory.Options options = new BitmapFactory.Options();
-			options.inDither = false;
-			options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-
-			if (cursor.moveToFirst()) {
-				int id = cursor.getInt(cursor
-						.getColumnIndex(MediaStore.Video.Media._ID));
-
-				Bitmap thumbnail = MediaStore.Video.Thumbnails.getThumbnail(cr,
-						id, Images.Thumbnails.MICRO_KIND, options);
-				cursor.close();
-				return thumbnail;
-			} else {
-				cursor.close();
-				return null;
-			}
-		}
+//		private Bitmap GetCurrentVideoThumbnail() {
+//			// selection
+//			String selection = MediaStore.Video.Media.DATA + " = '"
+//					+ this.mVideoFile + "'";
+//
+//			ContentResolver cr = getContentResolver();
+//			Cursor cursor = cr.query(
+//					MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+//					new String[] { MediaStore.Video.Media._ID }, selection,
+//					null, null);
+//
+//			BitmapFactory.Options options = new BitmapFactory.Options();
+//			options.inDither = false;
+//			options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+//
+//			if (cursor.moveToFirst()) {
+//				int id = cursor.getInt(cursor
+//						.getColumnIndex(MediaStore.Video.Media._ID));
+//
+//				Bitmap thumbnail = MediaStore.Video.Thumbnails.getThumbnail(cr,
+//						id, Images.Thumbnails.MICRO_KIND, options);
+//				cursor.close();
+//				return thumbnail;
+//			} else {
+//				cursor.close();
+//				return null;
+//			}
+//		}
 	}
 
 	@Override
@@ -390,11 +382,11 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 
 			Camera.Parameters parameters = mCamera.getParameters();
 			parameters.setPreviewSize(width, height);
-			List<Size> vSizeList = parameters.getSupportedPictureSizes();
-
-			for (int num = 0; num < vSizeList.size(); num++) {
-				Size vSize = vSizeList.get(num);
-			}
+//			List<Size> vSizeList = parameters.getSupportedPictureSizes();
+//
+//			for (int num = 0; num < vSizeList.size(); num++) {
+//				Size vSize = vSizeList.get(num);
+//			}
 			if (this.getResources().getConfiguration().orientation != Configuration.ORIENTATION_LANDSCAPE) {
 				// Èç¹ûÊÇÊúÆÁ
 				// parameters.set("orientation", "portrait");

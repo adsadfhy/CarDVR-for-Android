@@ -1,18 +1,13 @@
 package com.example.cardvr;
 
 import com.example.test.R;
-import com.example.test.R.id;
-import com.example.test.R.layout;
-import com.example.test.R.menu;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.ImageButton;
 import android.widget.MediaController;
 import android.widget.VideoView;

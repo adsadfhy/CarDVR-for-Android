@@ -1,15 +1,10 @@
 package com.example.cardvr;
 
-import java.io.File;
 import java.sql.Date;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
-
 import com.example.test.R;
-
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -19,10 +14,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Images;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,16 +26,13 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
+
 
 public class ListViewActivity extends Activity {
 	private ListView mVideoListView = null;
 	private ImageButton mReturnButton = null;
 	private MyListAdapter myAdapter = null;
 	ListViewActivity arrayList = null;
-	private String[] mListTitle = { "时间", "性别", "年龄", "居住地", "邮箱" };
-	private String[] mListStr = { "雨松MOMO", "男", "25", "北京",
-			"xuanyusong@gmail.com" };
 
 	private ArrayList<VideoInfo> mVideoInfoList = null;
 
@@ -94,21 +84,21 @@ public class ListViewActivity extends Activity {
 
 	private void InitialVideoThumbnails() {
 		// MediaStore.Video.Thumbnails.DATA:视频缩略图的文件路径
-		String[] thumbColumns = { MediaStore.Video.Thumbnails.DATA,
-				MediaStore.Video.Thumbnails.VIDEO_ID };
+//		String[] thumbColumns = { MediaStore.Video.Thumbnails.DATA,
+//				MediaStore.Video.Thumbnails.VIDEO_ID };
 
 		// MediaStore.Video.Media.DATA：视频文件路径；
 		// MediaStore.Video.Media.DISPLAY_NAME : 视频文件名，如 testVideo.mp4
 		// MediaStore.Video.Media.TITLE: 视频标题 : testVideo
-		String[] mediaColumns = { MediaStore.Video.Media._ID,
-				MediaStore.Video.Media.DATA, MediaStore.Video.Media.TITLE };
+//		String[] mediaColumns = { MediaStore.Video.Media._ID,
+//				MediaStore.Video.Media.DATA, MediaStore.Video.Media.TITLE };
 		// selection
 		String selection = MediaStore.Video.Media.DATA
 				+ " like '%mnt/sdcard/DVR%'";
 		// set query directory
-		String path = Environment.getExternalStorageDirectory() + "/DVR";
+//		String path = Environment.getExternalStorageDirectory() + "/DVR";
 		// selectionArgs：
-		String[] selectionArgs = { path };
+//		String[] selectionArgs = { path };
 
 		ContentResolver cr = this.getContentResolver();
 		Cursor cursor = cr.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
