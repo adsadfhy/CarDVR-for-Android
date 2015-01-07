@@ -17,11 +17,11 @@
 
     <uses-permission android:name="android.permission.RECORD_VIDEO" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-	<uses-permission android:name="android.permission.WAKE_LOCK" />
-	
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
     <application
         android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@drawable/launcher_icon"
         android:label="@string/app_name"
         android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" >
         <activity
@@ -40,11 +40,6 @@
         <activity
             android:name="com.example.cardvr.PlayVideoActivity"
             android:label="@string/title_activity_play_video" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
     </application>
 

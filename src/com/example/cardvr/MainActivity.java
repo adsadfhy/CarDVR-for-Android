@@ -164,6 +164,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 										
 					// lower screen brightness to save battery
 					setScreenBrightness(MainActivity.this, recordScreenBrightness);
+					mVideoButton.setImageResource(R.drawable.stoprecord);
 					isRecording = true;
 				} catch (IllegalStateException e) {
 					Log.e(TAG, e.getMessage());
@@ -241,6 +242,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 					}
 				}
 				setScreenBrightness(MainActivity.this, mScreenBrightness);
+				mVideoButton.setImageResource(R.drawable.startrecord);
 			}
 		}
 

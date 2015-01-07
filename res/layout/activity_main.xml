@@ -14,12 +14,13 @@
 
     <ImageButton
         android:id="@+id/imageButton1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
+        android:background="@android:color/transparent"
         android:contentDescription="@string/video_button"
-        android:src="@android:drawable/ic_media_play" />
+        android:src="@drawable/startrecord" />
 
     <ImageView
         android:id="@+id/imageView1"
